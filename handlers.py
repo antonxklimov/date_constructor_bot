@@ -241,3 +241,40 @@ async def process_custom_final_touch_text(message: Message, state: FSMContext):
         parse_mode="HTML"
     )
     await state.set_state(DateConstructorStates.date)
+
+@router.message(StateFilter(UserState.waiting_for_date))
+async def process_date(message: Message, state: FSMContext):
+    """Обработка выбора даты"""
+    try:
+        # Получаем текущее состояние
+        data = await state.get_data()
+        atmo_text = data.get('atmosphere', '')
+        act_text = data.get('activity', '')
+        final_text = data.get('final_touch', '')
+        
+        # Форматируем дату
+        date_text = message.text.strip()
+        
+        # Формируем финальный текст
+        final_message = (
+            f"Мы просыпаемся <b>{date_text}</b> и отправляемся <b>{atmo_text}</b>.\n"
+            f"После этого нас ждет <b>{act_text}</b>.\n"
+            f"А завершим мы день <b>{final_text}</b>."
+        )
+        
+        # Отправляем финальный текст
+        await message.answer(final_message, parse_mode="HTML")
+        
+        # Отправляем комментарий и предложение
+        await message.answer(
+            "💫 Отличный выбор! Надеюсь, этот день будет особенным и запомнится надолго.\n\n"
+            "Если захотите спланировать еще одно свидание, просто напишите /start"
+        )
+        
+        # Сбрасываем состояние
+        await state.clear()
+        
+    except Exception as e:
+        logger.error(f"Error in process_date: {e}")
+        await message.answer("Произошла ошибка при обработке даты. Пожалуйста, попробуйте еще раз.")
+        await state.clear()
