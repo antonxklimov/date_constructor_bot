@@ -244,7 +244,7 @@ async def process_custom_final_touch_text(message: Message, state: FSMContext):
     )
     await state.set_state(DateConstructorStates.date)
 
-@router.message(StateFilter(UserState.waiting_for_date))
+@router.message(StateFilter(DateConstructorStates.date))
 async def process_date(message: Message, state: FSMContext):
     """Обработка выбора даты"""
     try:
