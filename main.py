@@ -1,11 +1,16 @@
 import asyncio
 import os
 from aiogram import Bot, Dispatcher
-from config import BOT_TOKEN
+# from config import BOT_TOKEN # Удаляем импорт config
 from handlers import router
 
 async def main():
-    bot = Bot(token=BOT_TOKEN)
+    # Получаем BOT_TOKEN из переменных окружения
+    bot_token = os.getenv("BOT_TOKEN")
+    if not bot_token:
+        raise ValueError("BOT_TOKEN environment variable not set")
+
+    bot = Bot(token=bot_token)
     dp = Dispatcher()
     dp.include_router(router)
     

@@ -2,8 +2,8 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from datetime import datetime
+import os
 
-from config import ADMIN_ID
 from states import DateConstructorStates
 from keyboards import (
     get_atmosphere_keyboard,
@@ -14,6 +14,9 @@ from keyboards import (
 )
 
 router = Router()
+
+# Получаем ADMIN_ID из переменных окружения
+ADMIN_ID = int(os.getenv("ADMIN_ID")) # Конвертируем в int, так как ID число
 
 # Словари соответствий для текстов кнопок
 ATMOSPHERE_TEXTS = {
