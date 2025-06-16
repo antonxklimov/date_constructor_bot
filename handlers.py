@@ -108,8 +108,8 @@ async def process_activity(callback: CallbackQuery, state: FSMContext):
     await state.set_state(DateConstructorStates.final_touch)
     await callback.answer()
 
-@router.callback_query(DateConstructorStates.final_touch)
-async def process_final_touch(callback: CallbackQuery, state: FSMContext):
+@router.callback_query(F.data.startswith("final_"))
+async def process_final_touch_selection(callback: CallbackQuery, state: FSMContext):
     await state.update_data(final_touch=callback.data)
     await callback.message.edit_text(
         "<b>Шаг 4. Выбор даты.</b>\n\n"
