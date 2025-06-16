@@ -11,13 +11,12 @@ async def main(context):
         # Log request details for debugging
         context.log(f"Received request with method: {context.req.method}")
         context.log(f"Request path: {context.req.path}")
-        # Appwrite passes request body as a string, parse it as JSON
+        # Appwrite passes request body as a dictionary, not a string
         request_body = context.req.body
         context.log(f"Request body raw: {request_body}")
 
         # Parse the JSON body into an aiogram Update object
-        update_data = json.loads(request_body)
-        update = Update.model_validate(update_data)
+        update = Update.model_validate(request_body)
 
         # Initialize Bot and Dispatcher for each execution (stateless)
         bot_token = os.getenv("BOT_TOKEN")
@@ -37,4 +36,4 @@ async def main(context):
     except Exception as e:
         # Log the error to Appwrite Console and return a 500 error
         context.error(f"Error during function execution: {e}")
-        return context.res.json({"error": str(e)}, status=500)
+        return context.res.json({"error": str(e)})
