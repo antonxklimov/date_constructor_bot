@@ -108,30 +108,28 @@ async def process_activity_selection(callback: CallbackQuery, state: FSMContext)
     await state.set_state(DateConstructorStates.final_touch)
     await callback.answer()
 
-@router.callback_query()
+@router.callback_query(F.data.startswith("final_"))
 async def process_final_touch(callback: CallbackQuery, state: FSMContext):
-    logger.info(f"Received callback data: {callback.data}")
-    if callback.data.startswith("final_"):
-        await state.update_data(final_touch=callback.data)
-        await callback.message.edit_text(
-            "<b>Шаг 4. Выбор даты.</b>\n\n"
-            "📅 Выбери дату:",
-            reply_markup=get_date_keyboard(),
-            parse_mode="HTML"
-        )
-        await state.set_state(DateConstructorStates.date)
-    elif callback.data == "custom_final":
-        await callback.message.edit_text(
-            "Напиши, куда бы ты хотел(а) пойти вечером:"
-        )
-        await state.set_state(DateConstructorStates.custom_final_touch)
+    await state.update_data(final_touch=callback.data)
+    await callback.message.edit_text(
+        "<b>Шаг 4. Выбор даты.</b>\n\n"
+        "📅 Выбери дату:",
+        reply_markup=get_date_keyboard(),
+        parse_mode="HTML"
+    )
+    await state.set_state(DateConstructorStates.date)
     await callback.answer()
 
-@router.callback_query(DateConstructorStates.date)
+@router.callback_query(F.data == "custom_final")
+async def process_custom_final_touch(callback: CallbackQuery, state: FSMContext):
+    await callback.message.edit_text(
+        "Напиши, куда бы ты хотел(а) пойти вечером:"
+    )
+    await state.set_state(DateConstructorStates.custom_final_touch)
+    await callback.answer()
+
+@router.callback_query(F.data.startswith("date_"))
 async def process_date(callback: CallbackQuery, state: FSMContext):
-    if not callback.data.startswith("date_"):
-        return
-    
     date = callback.data[5:]  # Убираем префикс "date_"
     await state.update_data(date=date)
     data = await state.get_data()
