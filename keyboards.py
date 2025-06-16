@@ -40,10 +40,6 @@ def get_date_keyboard():
     for i in range(14):
         date = today + timedelta(days=i)
         date_str = date.strftime("%d.%m.%Y")
-        keyboard.append([KeyboardButton(text=date_str)])
+        keyboard.append([InlineKeyboardButton(text=date_str, callback_data=f"date_{date_str}")])
     
-    return ReplyKeyboardMarkup(
-        keyboard=keyboard,
-        resize_keyboard=True,
-        one_time_keyboard=True
-    )
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)

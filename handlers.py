@@ -127,76 +127,33 @@ async def process_final_touch(callback: CallbackQuery, state: FSMContext):
         await state.set_state(DateConstructorStates.custom_final_touch)
     await callback.answer()
 
-@router.message(DateConstructorStates.date)
-async def process_date(message: Message, state: FSMContext):
-    await state.update_data(date=message.text)
-    await message.answer("🧘‍♀️ Есть ли что-то, что ты хочешь добавить или предложить?")
-    await state.set_state(DateConstructorStates.comment)
-
-@router.message(DateConstructorStates.comment)
-async def process_comment(message: Message, state: FSMContext, bot):
-    await state.update_data(comment=message.text)
+@router.callback_query(DateConstructorStates.date)
+async def process_date(callback: CallbackQuery, state: FSMContext):
+    if not callback.data.startswith("date_"):
+        return
+    
+    date = callback.data[5:]  # Убираем префикс "date_"
+    await state.update_data(date=date)
     data = await state.get_data()
-
-    # Преобразуем дату в формат '21 июня'
-    date_str = data.get('date', '')
-    try:
-        date_obj = datetime.strptime(date_str, "%d.%m.%Y")
-        day = date_obj.day
-        month = MONTHS[date_obj.strftime("%m")]
-        date_text = f"{day} {month}"
-    except Exception:
-        date_text = date_str
-
-    # Получаем тексты по callback_data
-    atmo_text = ATMOSPHERE_TEXTS.get(data.get('atmosphere'), data.get('atmosphere'))
-    act_text = ACTIVITY_TEXTS.get(data.get('activity'), data.get('activity'))
-    final_touch = FINAL_TOUCH_TEXTS.get(data.get('final_touch'), data.get('final_touch'))
-
-    # Добавляем дополнительные сообщения в зависимости от выбора
-    additional_atmo_text = ""
-    if data.get('atmosphere') == "atmo_1":
-        additional_atmo_text = " Натуральное игристое открывается сразу после катера."
-    elif data.get('atmosphere') == "atmo_2":
-        additional_atmo_text = " Петнат будет и здесь, но из рюкзака и прямо на воде."
-    elif data.get('atmosphere') == "atmo_3":
-        additional_atmo_text = " Здесь игристое запрещено, поэтому оно нас ждет чуть позже."
-
-    additional_final_text = ""
-    if data.get('final_touch') == "final_1":
-        additional_final_text = " Отличный выбор, современная классика и креветки с малиной."
-    elif data.get('final_touch') == "final_2":
-        additional_final_text = " Вижу, что хочется мяса."
-    elif data.get('final_touch') == "final_3":
-        additional_final_text = " Идем исследовать нэтти."
-    elif data.get('final_touch') == "final_4":
-        additional_final_text = " Давно не были, пора выпить саке!"
-
-    text = (
-        "Ура! ✨\n\n"
-        f"Мы просыпаемся <b>{date_text}</b> и отправляемся <b>{atmo_text}</b>.{additional_atmo_text}\n"
-        f"Немного устаем, но сможем вдохнуть в себя силы искусством — нас ждет <b>{act_text}</b>.\n"
-        f"Финальной точкой дня становится <b>{final_touch}</b>.{additional_final_text} А дальше смотрим куда нас заведет этот вечер. До встречи!\n\n"
-        "💕 👀\n\n"
-        "<i>PS. На протяжении всего дня мы подпитываемся не только искусством, но и совершаем приятные привалы с пивом или вином. Без этого никак!</i>"
+    
+    # Получаем текстовые значения для каждого выбора
+    atmo_text = ATMOSPHERE_TEXTS.get(data.get("atmosphere", ""), data.get("atmosphere"))
+    activity_text = ACTIVITY_TEXTS.get(data.get("activity", ""), data.get("activity"))
+    final_touch_text = FINAL_TOUCH_TEXTS.get(data.get("final_touch", ""), data.get("final_touch"))
+    
+    # Формируем итоговый текст
+    final_text = (
+        f"Мы просыпаемся <b>{date}</b> и отправляемся <b>{atmo_text}</b>.\n"
+        f"После этого идем <b>{activity_text}</b>.\n"
+        f"А вечером нас ждет <b>{final_touch_text}</b>."
     )
     
-    # Отправляем красивое сообщение пользователю
-    await message.answer(text, parse_mode="HTML")
-
-    # Отправляем результаты админу
-    admin_text = (
-        f"📅 Новое свидание!\n\n"
-        f"От пользователя: {message.from_user.full_name} (@{message.from_user.username})\n"
-        f"<b>Дата:</b> {date_text}\n"
-        f"<b>Утро:</b> {atmo_text}{additional_atmo_text}\n"
-        f"<b>День:</b> {act_text}\n"
-        f"<b>Вечер:</b> {final_touch}{additional_final_text}\n"
-        f"<b>Комментарий:</b> {message.text}"
+    await callback.message.edit_text(
+        final_text,
+        parse_mode="HTML"
     )
-    await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
-    
     await state.clear()
+    await callback.answer()
 
 @router.callback_query(F.data == "custom_atmo")
 async def process_custom_atmosphere(callback: CallbackQuery, state: FSMContext):
