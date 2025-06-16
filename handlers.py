@@ -192,8 +192,11 @@ async def process_date(callback: CallbackQuery, state: FSMContext, bot):
     )
     await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
     
-    # Переходим к финальному этапу
-    await state.set_state(DateConstructorStates.final)
+    # Переходим к этапу комментария
+    await callback.message.answer(
+        "💭 Хочешь добавить что-то от себя? Напиши комментарий или предложение:"
+    )
+    await state.set_state(DateConstructorStates.comment)
     await callback.answer()
 
 @router.callback_query(F.data == "custom_atmo")
@@ -268,19 +271,29 @@ async def process_date(message: Message, state: FSMContext):
         # Отправляем финальный текст
         await message.answer(final_message, parse_mode="HTML")
         
-        # Переходим к финальному этапу
-        await state.set_state(DateConstructorStates.final)
+        # Переходим к этапу комментария
+        await message.answer(
+            "💭 Хочешь добавить что-то от себя? Напиши комментарий или предложение:"
+        )
+        await state.set_state(DateConstructorStates.comment)
         
     except Exception as e:
         logger.error(f"Error in process_date: {e}")
         await message.answer("Произошла ошибка при обработке даты. Пожалуйста, попробуйте еще раз.")
         await state.clear()
 
-@router.message(StateFilter(DateConstructorStates.final))
-async def process_final(message: Message, state: FSMContext):
-    """Обработка финального этапа"""
+@router.message(StateFilter(DateConstructorStates.comment))
+async def process_comment(message: Message, state: FSMContext, bot):
+    """Обработка комментария пользователя"""
     try:
-        # Отправляем комментарий и предложение
+        # Отправляем комментарий админу
+        await bot.send_message(
+            ADMIN_ID,
+            f"💭 Комментарий от пользователя {message.from_user.full_name} (@{message.from_user.username}):\n\n{message.text}",
+            parse_mode="HTML"
+        )
+        
+        # Отправляем финальное сообщение пользователю
         await message.answer(
             "💫 Отличный выбор! Надеюсь, этот день будет особенным и запомнится надолго.\n\n"
             "Если захотите спланировать еще одно свидание, просто напишите /start"
@@ -290,6 +303,6 @@ async def process_final(message: Message, state: FSMContext):
         await state.clear()
         
     except Exception as e:
-        logger.error(f"Error in process_final: {e}")
+        logger.error(f"Error in process_comment: {e}")
         await message.answer("Произошла ошибка. Пожалуйста, попробуйте еще раз.")
         await state.clear()
