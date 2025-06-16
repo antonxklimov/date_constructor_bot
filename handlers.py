@@ -226,7 +226,7 @@ async def process_comment(message: Message, state: FSMContext, bot):
         
         # Отправляем финальное сообщение
         await message.answer(
-            "💫 Отличный выбор! Надеюсь, этот день будет особенным и запомнится надолго.\n\n"
+            "💫 Отличный выбор! Будет классно!\n\n"
             "Если захотите спланировать еще одно свидание, просто напишите /start"
         )
         
@@ -241,7 +241,7 @@ async def process_comment(message: Message, state: FSMContext, bot):
 @router.callback_query(F.data == "custom_atmo")
 async def process_custom_atmosphere(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(
-        "Напиши, куда бы ты хотел(а) пойти утром:"
+        "Напиши, куда бы ты хотела пойти утром:"
     )
     await state.set_state(DateConstructorStates.custom_atmosphere)
     await callback.answer()
@@ -260,7 +260,7 @@ async def process_custom_atmosphere_text(message: Message, state: FSMContext):
 @router.callback_query(F.data == "custom_act")
 async def process_custom_activity(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(
-        "Напиши, куда бы ты хотел(а) пойти днем:"
+        "Напиши, куда бы ты хотела пойти днем:"
     )
     await state.set_state(DateConstructorStates.custom_activity)
     await callback.answer()

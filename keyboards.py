@@ -22,7 +22,7 @@ def get_final_touch_keyboard():
         [InlineKeyboardButton(text="За Крышей", callback_data="final_1")],
         [InlineKeyboardButton(text="Bruno", callback_data="final_2")],
         [InlineKeyboardButton(text="Big Wine Freaks", callback_data="final_3")],
-        [InlineKeyboardButton(text="Таби", callback_data="final_4")],
+        [InlineKeyboardButton(text="таби", callback_data="final_4")],
         [InlineKeyboardButton(text="Свой вариант →", callback_data="custom_final")],
     ])
 
