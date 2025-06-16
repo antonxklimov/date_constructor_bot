@@ -84,8 +84,8 @@ async def start_steps(message: Message, state: FSMContext):
         logger.error(f"Error in 'Ого! Давай попробуем! 👀': {e}")
         raise
 
-@router.callback_query(DateConstructorStates.atmosphere)
-async def process_atmosphere(callback: CallbackQuery, state: FSMContext):
+@router.callback_query(F.data.startswith("atmo_"))
+async def process_atmosphere_selection(callback: CallbackQuery, state: FSMContext):
     await state.update_data(atmosphere=callback.data)
     await callback.message.edit_text(
         "<b>Шаг 2. День.</b>\n\n"
@@ -96,8 +96,8 @@ async def process_atmosphere(callback: CallbackQuery, state: FSMContext):
     await state.set_state(DateConstructorStates.activity)
     await callback.answer()
 
-@router.callback_query(DateConstructorStates.activity)
-async def process_activity(callback: CallbackQuery, state: FSMContext):
+@router.callback_query(F.data.startswith("act_"))
+async def process_activity_selection(callback: CallbackQuery, state: FSMContext):
     await state.update_data(activity=callback.data)
     await callback.message.edit_text(
         "<b>Шаг 3. Вечер.</b>\n\n"
