@@ -38,4 +38,5 @@ def main(context):
     except Exception as e:
         # Log the error to Appwrite Console and return a 500 error
         context.error(f"Error during function execution: {e}")
-        return context.res.json({"error": str(e)}, status=500)
+        context.res.status(500) # Устанавливаем статус перед отправкой JSON
+        return context.res.json({"error": str(e)}) # Удаляем status из аргументов json()
