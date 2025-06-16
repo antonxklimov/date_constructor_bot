@@ -4,7 +4,8 @@ from aiogram.fsm.context import FSMContext
 from datetime import datetime
 import os
 
-from states import DateConstructorStates
+# from config import ADMIN_ID # Удаляем импорт config
+from .states import DateConstructorStates # Изменено на относительный импорт
 from keyboards import (
     get_atmosphere_keyboard,
     get_activity_keyboard,
