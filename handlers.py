@@ -181,12 +181,6 @@ async def process_date(callback: CallbackQuery, state: FSMContext, bot):
     # Отправляем красивое сообщение пользователю
     await callback.message.edit_text(text, parse_mode="HTML")
 
-    # Отправляем комментарий и предложение
-    await callback.message.answer(
-        "💫 Отличный выбор! Надеюсь, этот день будет особенным и запомнится надолго.\n\n"
-        "Если захотите спланировать еще одно свидание, просто напишите /start"
-    )
-
     # Отправляем результаты админу
     admin_text = (
         f"📅 Новое свидание!\n\n"
@@ -198,7 +192,8 @@ async def process_date(callback: CallbackQuery, state: FSMContext, bot):
     )
     await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
     
-    await state.clear()
+    # Переходим к финальному этапу
+    await state.set_state(DateConstructorStates.final)
     await callback.answer()
 
 @router.callback_query(F.data == "custom_atmo")
@@ -273,6 +268,18 @@ async def process_date(message: Message, state: FSMContext):
         # Отправляем финальный текст
         await message.answer(final_message, parse_mode="HTML")
         
+        # Переходим к финальному этапу
+        await state.set_state(DateConstructorStates.final)
+        
+    except Exception as e:
+        logger.error(f"Error in process_date: {e}")
+        await message.answer("Произошла ошибка при обработке даты. Пожалуйста, попробуйте еще раз.")
+        await state.clear()
+
+@router.message(StateFilter(DateConstructorStates.final))
+async def process_final(message: Message, state: FSMContext):
+    """Обработка финального этапа"""
+    try:
         # Отправляем комментарий и предложение
         await message.answer(
             "💫 Отличный выбор! Надеюсь, этот день будет особенным и запомнится надолго.\n\n"
@@ -283,6 +290,6 @@ async def process_date(message: Message, state: FSMContext):
         await state.clear()
         
     except Exception as e:
-        logger.error(f"Error in process_date: {e}")
-        await message.answer("Произошла ошибка при обработке даты. Пожалуйста, попробуйте еще раз.")
+        logger.error(f"Error in process_final: {e}")
+        await message.answer("Произошла ошибка. Пожалуйста, попробуйте еще раз.")
         await state.clear()
