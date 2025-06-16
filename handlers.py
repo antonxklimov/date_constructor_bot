@@ -9,7 +9,7 @@ import logging
 import time
 
 # from config import ADMIN_ID # Удаляем импорт config
-from .states import DateConstructorStates, UserState # Изменено на относительный импорт
+from .states import DateConstructorStates
 from .keyboards import ( # Изменено на относительный импорт
     get_atmosphere_keyboard,
     get_activity_keyboard,
