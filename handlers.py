@@ -55,7 +55,7 @@ async def cmd_start(message: Message, state: FSMContext):
     logger.info(f"Processing /start command from user {message.from_user.id}")
     try:
         await message.answer(
-            "Привет! Я — конструктор свиданий <b>Date Day 2025</b>.\n\n"
+            "Привет! Я — конструктор свиданий <b>Date Day 2025</b> 🚧\n\n"
             "Я помогу тебе собрать идеальное свидание в несколько шагов. Просто выбирай, что тебе нравится, а я соберу всё воедино и расскажу Антону.",
             reply_markup=get_start_keyboard(),
             parse_mode="HTML"
@@ -66,10 +66,10 @@ async def cmd_start(message: Message, state: FSMContext):
         logger.error(f"Error in /start command: {e}")
         raise
 
-@router.message(F.text == "Ого! Давай попробуем!")
+@router.message(F.text == "Ого! Давай попробуем! 👀")
 async def start_steps(message: Message, state: FSMContext):
     start_time = time.time()
-    logger.info(f"Processing 'Ого! Давай попробуем!' from user {message.from_user.id}")
+    logger.info(f"Processing 'Ого! Давай попробуем! 👀' from user {message.from_user.id}")
     try:
         await message.answer("Отлично! Давайте начнем.", reply_markup=ReplyKeyboardRemove())
         await message.answer(
@@ -79,9 +79,9 @@ async def start_steps(message: Message, state: FSMContext):
             parse_mode="HTML"
         )
         await state.set_state(DateConstructorStates.atmosphere)
-        logger.info(f"'Ого! Давай попробуем!' processed in {time.time() - start_time:.2f} seconds")
+        logger.info(f"'Ого! Давай попробуем! 👀' processed in {time.time() - start_time:.2f} seconds")
     except Exception as e:
-        logger.error(f"Error in 'Ого! Давай попробуем!': {e}")
+        logger.error(f"Error in 'Ого! Давай попробуем! 👀': {e}")
         raise
 
 @router.callback_query(DateConstructorStates.atmosphere)
@@ -113,11 +113,11 @@ async def process_final_touch(callback: CallbackQuery, state: FSMContext):
     await state.update_data(final_touch=callback.data)
     await callback.message.edit_text(
         "<b>Шаг 4. Выбор даты.</b>\n\n"
-        "Выберите удобную дату для свидания:",
+        "📅 Выберите удобную дату для свидания:",
         parse_mode="HTML"
     )
     await callback.message.answer(
-        "Выберите дату:",
+        "📅 Выберите дату:",
         reply_markup=get_date_keyboard()
     )
     await state.set_state(DateConstructorStates.date)
@@ -126,7 +126,7 @@ async def process_final_touch(callback: CallbackQuery, state: FSMContext):
 @router.message(DateConstructorStates.date)
 async def process_date(message: Message, state: FSMContext):
     await state.update_data(date=message.text)
-    await message.answer("Есть ли что-то, что ты хочешь добавить?")
+    await message.answer("🧘‍♀️ Есть ли что-то, что ты хочешь добавить или предложить?")
     await state.set_state(DateConstructorStates.comment)
 
 @router.message(DateConstructorStates.comment)

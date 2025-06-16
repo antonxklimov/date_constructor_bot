@@ -25,7 +25,7 @@ def get_final_touch_keyboard():
 
 def get_start_keyboard():
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="Ого! Давай попробуем!")]],
+        keyboard=[[KeyboardButton(text="Ого! Давай попробуем! 👀")]],
         resize_keyboard=True
     )
 
