@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher, Router
 from aiogram.types import Update
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
-from .handlers import register_handlers
+from .handlers import router
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -26,15 +26,11 @@ ADMIN_ID = os.getenv("ADMIN_ID")
 if not ADMIN_ID:
     raise ValueError("ADMIN_ID environment variable not set or empty")
 
-# Инициализация бота и диспетчера
+# Инициализация бота и диспетчера (глобальные объекты)
 bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
-
-# Создание и настройка роутера
-router = Router()
-register_handlers(router)
-dp.include_router(router)
+dp.include_router(router)  # Прикрепляем роутер один раз при инициализации
 
 async def main(context: Dict[str, Any]) -> Dict[str, Any]:
     """
