@@ -7,7 +7,14 @@ async def main():
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
-    await dp.start_polling(bot)
+    await dp.start_webhook(
+        webhook_path="/",
+        on_startup=None,
+        on_shutdown=None,
+        skip_updates=True,
+        host="0.0.0.0",
+        port=8000,
+    )
 
 if __name__ == "__main__":
     asyncio.run(main())
