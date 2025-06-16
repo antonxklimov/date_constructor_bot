@@ -6,7 +6,7 @@ from aiogram.types import Update
 from .handlers import router
 
 # Appwrite Function entry point
-def main(context):
+async def main(context):
     try:
         # Log request details for debugging
         context.log(f"Received request with method: {context.req.method}")
@@ -29,8 +29,7 @@ def main(context):
         dp.include_router(router)
 
         # Process the update using aiogram's dispatcher
-        # Необходимо обернуть асинхронный вызов в asyncio.run для синхронной функции Appwrite
-        asyncio.run(dp.process_update(update))
+        await dp.feed_update(bot, update)
 
         # Return a successful response to Telegram (Appwrite expects a response)
         return context.res.json({"status": "ok"})
@@ -38,5 +37,4 @@ def main(context):
     except Exception as e:
         # Log the error to Appwrite Console and return a 500 error
         context.error(f"Error during function execution: {e}")
-        context.res.status(500) # Устанавливаем статус перед отправкой JSON
-        return context.res.json({"error": str(e)}) # Удаляем status из аргументов json()
+        return context.res.json({"error": str(e)}, status=500)
