@@ -6,7 +6,7 @@ import os
 
 # from config import ADMIN_ID # Удаляем импорт config
 from .states import DateConstructorStates # Изменено на относительный импорт
-from keyboards import (
+from .keyboards import ( # Изменено на относительный импорт
     get_atmosphere_keyboard,
     get_activity_keyboard,
     get_final_touch_keyboard,
