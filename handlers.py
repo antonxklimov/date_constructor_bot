@@ -113,11 +113,10 @@ async def process_final_touch(callback: CallbackQuery, state: FSMContext):
     await state.update_data(final_touch=callback.data)
     await callback.message.edit_text(
         "<b>Шаг 4. Выбор даты.</b>\n\n"
-        "📅 Выберите удобную дату для свидания:",
+        "📅 Выбери удобную дату для свидания:",
         parse_mode="HTML"
     )
     await callback.message.answer(
-        "📅 Выберите дату:",
         reply_markup=get_date_keyboard()
     )
     await state.set_state(DateConstructorStates.date)
