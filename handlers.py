@@ -3,6 +3,8 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from datetime import datetime
 import os
+import logging
+import time
 
 # from config import ADMIN_ID # Удаляем импорт config
 from .states import DateConstructorStates # Изменено на относительный импорт
@@ -44,26 +46,43 @@ MONTHS = {
     "07": "июля", "08": "августа", "09": "сентября", "10": "октября", "11": "ноября", "12": "декабря"
 }
 
+# Настройка логирования
+logger = logging.getLogger(__name__)
+
 @router.message(F.text == "/start")
 async def cmd_start(message: Message, state: FSMContext):
-    await message.answer(
-        "Привет! Я — конструктор свиданий <b>Date Day 2025</b>.\n\n"
-        "Я помогу тебе собрать идеальное свидание в несколько шагов. Просто выбирай, что тебе нравится, а я соберу всё воедино и расскажу Антону.",
-        reply_markup=get_start_keyboard(),
-        parse_mode="HTML"
-    )
-    await state.clear()
+    start_time = time.time()
+    logger.info(f"Processing /start command from user {message.from_user.id}")
+    try:
+        await message.answer(
+            "Привет! Я — конструктор свиданий <b>Date Day 2025</b>.\n\n"
+            "Я помогу тебе собрать идеальное свидание в несколько шагов. Просто выбирай, что тебе нравится, а я соберу всё воедино и расскажу Антону.",
+            reply_markup=get_start_keyboard(),
+            parse_mode="HTML"
+        )
+        await state.clear()
+        logger.info(f"/start command processed in {time.time() - start_time:.2f} seconds")
+    except Exception as e:
+        logger.error(f"Error in /start command: {e}")
+        raise
 
 @router.message(F.text == "Ого! Давай попробуем!")
 async def start_steps(message: Message, state: FSMContext):
-    await message.answer("Отлично! Давайте начнем.", reply_markup=ReplyKeyboardRemove())
-    await message.answer(
-        "<b>Часть 1. Утро.</b>\n\n"
-        "Здесь можно проснуться либо рано, либо поздно, но хочется какой-то активности (завтрак в модном месте включен):",
-        reply_markup=get_atmosphere_keyboard(),
-        parse_mode="HTML"
-    )
-    await state.set_state(DateConstructorStates.atmosphere)
+    start_time = time.time()
+    logger.info(f"Processing 'Ого! Давай попробуем!' from user {message.from_user.id}")
+    try:
+        await message.answer("Отлично! Давайте начнем.", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            "<b>Часть 1. Утро.</b>\n\n"
+            "Здесь можно проснуться либо рано, либо поздно, но хочется какой-то активности (завтрак в модном месте включен):",
+            reply_markup=get_atmosphere_keyboard(),
+            parse_mode="HTML"
+        )
+        await state.set_state(DateConstructorStates.atmosphere)
+        logger.info(f"'Ого! Давай попробуем!' processed in {time.time() - start_time:.2f} seconds")
+    except Exception as e:
+        logger.error(f"Error in 'Ого! Давай попробуем!': {e}")
+        raise
 
 @router.callback_query(DateConstructorStates.atmosphere)
 async def process_atmosphere(callback: CallbackQuery, state: FSMContext):
