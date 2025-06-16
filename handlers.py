@@ -17,7 +17,10 @@ from .keyboards import ( # Изменено на относительный им
 router = Router()
 
 # Получаем ADMIN_ID из переменных окружения
-ADMIN_ID = int(os.getenv("ADMIN_ID")) # Конвертируем в int, так как ID число
+admin_id_str = os.getenv("ADMIN_ID")
+if not admin_id_str:
+    raise ValueError("ADMIN_ID environment variable not set or empty")
+ADMIN_ID = int(admin_id_str) # Конвертируем в int, так как ID число
 
 # Словари соответствий для текстов кнопок
 ATMOSPHERE_TEXTS = {
