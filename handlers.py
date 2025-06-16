@@ -151,7 +151,7 @@ async def process_date(message: Message, state: FSMContext):
         
         # Переходим к этапу комментария
         await message.answer(
-            "💭 Хочешь добавить что-то от себя? Напиши комментарий или предложение:"
+            "💭 Хочешь добавить что-то? Напиши комментарий или предложение:"
         )
         await state.set_state(DateConstructorStates.comment)
         
@@ -217,9 +217,9 @@ async def process_comment(message: Message, state: FSMContext, bot):
             f"📅 Новое свидание!\n"
             f"От пользователя: {message.from_user.full_name} (@{message.from_user.username})\n\n"
             f"<b>Дата:</b> {date_text}\n"
-            f"<b>Утро:</b> {atmo_text}{additional_atmo_text}\n"
+            f"<b>Утро:</b> {atmo_text}\n"
             f"<b>День:</b> {act_text}\n"
-            f"<b>Вечер:</b> {final_touch}{additional_final_text}\n"
+            f"<b>Вечер:</b> {final_touch}\n"
             f"<b>Комментарий пользователя:</b> {message.text}"
         )
         await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
