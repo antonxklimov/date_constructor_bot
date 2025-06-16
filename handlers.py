@@ -134,70 +134,109 @@ async def process_custom_final_touch(callback: CallbackQuery, state: FSMContext)
 async def process_date(callback: CallbackQuery, state: FSMContext, bot):
     date = callback.data[5:]  # Убираем префикс "date_"
     await state.update_data(date=date)
-    data = await state.get_data()
-    
-    # Преобразуем дату в формат '21 июня'
-    try:
-        date_obj = datetime.strptime(date, "%d.%m.%Y")
-        day = date_obj.day
-        month = MONTHS[date_obj.strftime("%m")]
-        date_text = f"{day} {month}"
-    except Exception:
-        date_text = date
-
-    # Получаем тексты по callback_data
-    atmo_text = ATMOSPHERE_TEXTS.get(data.get('atmosphere'), data.get('atmosphere'))
-    act_text = ACTIVITY_TEXTS.get(data.get('activity'), data.get('activity'))
-    final_touch = FINAL_TOUCH_TEXTS.get(data.get('final_touch'), data.get('final_touch'))
-
-    # Добавляем дополнительные сообщения в зависимости от выбора
-    additional_atmo_text = ""
-    if data.get('atmosphere') == "atmo_1":
-        additional_atmo_text = " Натуральное игристое открывается сразу после катера."
-    elif data.get('atmosphere') == "atmo_2":
-        additional_atmo_text = " Петнат будет и здесь, но из рюкзака и прямо на воде."
-    elif data.get('atmosphere') == "atmo_3":
-        additional_atmo_text = " Здесь игристое запрещено, поэтому оно нас ждет чуть позже."
-
-    additional_final_text = ""
-    if data.get('final_touch') == "final_1":
-        additional_final_text = " Отличный выбор, современная классика и креветки с малиной."
-    elif data.get('final_touch') == "final_2":
-        additional_final_text = " Вижу, что хочется мяса."
-    elif data.get('final_touch') == "final_3":
-        additional_final_text = " Идем исследовать нэтти."
-    elif data.get('final_touch') == "final_4":
-        additional_final_text = " Давно не были, пора выпить саке!"
-
-    text = (
-        "Ура! ✨\n\n"
-        f"Мы просыпаемся <b>{date_text}</b> и отправляемся <b>{atmo_text}</b>.{additional_atmo_text}\n"
-        f"Немного устаем, но сможем вдохнуть в себя силы искусством — нас ждет <b>{act_text}</b>.\n"
-        f"Финальной точкой дня становится <b>{final_touch}</b>.{additional_final_text} А дальше смотрим куда нас заведет этот вечер. До встречи!\n\n"
-        "💕 👀\n\n"
-        "<i>PS. На протяжении всего дня мы подпитываемся не только искусством, но и совершаем приятные привалы с пивом или вином. Без этого никак!</i>"
-    )
-    
-    # Отправляем красивое сообщение пользователю
-    await callback.message.edit_text(text, parse_mode="HTML")
-
-    # Отправляем результаты админу
-    admin_text = (
-        f"📅 Новое свидание!\n\n"
-        f"От пользователя: {callback.from_user.full_name} (@{callback.from_user.username})\n"
-        f"<b>Дата:</b> {date_text}\n"
-        f"<b>Утро:</b> {atmo_text}{additional_atmo_text}\n"
-        f"<b>День:</b> {act_text}\n"
-        f"<b>Вечер:</b> {final_touch}{additional_final_text}"
-    )
-    await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
     
     # Переходим к этапу комментария
-    await callback.message.answer(
+    await callback.message.edit_text(
         "💭 Хочешь добавить что-то от себя? Напиши комментарий или предложение:"
     )
     await state.set_state(DateConstructorStates.comment)
     await callback.answer()
+
+@router.message(StateFilter(DateConstructorStates.date))
+async def process_date(message: Message, state: FSMContext):
+    """Обработка выбора даты"""
+    try:
+        # Сохраняем дату
+        await state.update_data(date=message.text.strip())
+        
+        # Переходим к этапу комментария
+        await message.answer(
+            "💭 Хочешь добавить что-то от себя? Напиши комментарий или предложение:"
+        )
+        await state.set_state(DateConstructorStates.comment)
+        
+    except Exception as e:
+        logger.error(f"Error in process_date: {e}")
+        await message.answer("Произошла ошибка при обработке даты. Пожалуйста, попробуйте еще раз.")
+        await state.clear()
+
+@router.message(StateFilter(DateConstructorStates.comment))
+async def process_comment(message: Message, state: FSMContext, bot):
+    """Обработка комментария пользователя"""
+    try:
+        # Получаем все данные
+        data = await state.get_data()
+        date = data.get('date', '')
+        atmo_text = ATMOSPHERE_TEXTS.get(data.get('atmosphere'), data.get('atmosphere'))
+        act_text = ACTIVITY_TEXTS.get(data.get('activity'), data.get('activity'))
+        final_touch = FINAL_TOUCH_TEXTS.get(data.get('final_touch'), data.get('final_touch'))
+        
+        # Преобразуем дату в формат '21 июня'
+        try:
+            date_obj = datetime.strptime(date, "%d.%m.%Y")
+            day = date_obj.day
+            month = MONTHS[date_obj.strftime("%m")]
+            date_text = f"{day} {month}"
+        except Exception:
+            date_text = date
+
+        # Добавляем дополнительные сообщения в зависимости от выбора
+        additional_atmo_text = ""
+        if data.get('atmosphere') == "atmo_1":
+            additional_atmo_text = " Натуральное игристое открывается сразу после катера."
+        elif data.get('atmosphere') == "atmo_2":
+            additional_atmo_text = " Петнат будет и здесь, но из рюкзака и прямо на воде."
+        elif data.get('atmosphere') == "atmo_3":
+            additional_atmo_text = " Здесь игристое запрещено, поэтому оно нас ждет чуть позже."
+
+        additional_final_text = ""
+        if data.get('final_touch') == "final_1":
+            additional_final_text = " Отличный выбор, современная классика и креветки с малиной."
+        elif data.get('final_touch') == "final_2":
+            additional_final_text = " Вижу, что хочется мяса."
+        elif data.get('final_touch') == "final_3":
+            additional_final_text = " Идем исследовать нэтти."
+        elif data.get('final_touch') == "final_4":
+            additional_final_text = " Давно не были, пора выпить саке!"
+
+        # Формируем финальный текст
+        final_message = (
+            "Ура! ✨\n\n"
+            f"Мы просыпаемся <b>{date_text}</b> и отправляемся <b>{atmo_text}</b>.{additional_atmo_text}\n"
+            f"Немного устаем, но сможем вдохнуть в себя силы искусством — нас ждет <b>{act_text}</b>.\n"
+            f"Финальной точкой дня становится <b>{final_touch}</b>.{additional_final_text} А дальше смотрим куда нас заведет этот вечер. До встречи!\n\n"
+            "💕 👀\n\n"
+            "<i>PS. На протяжении всего дня мы подпитываемся не только искусством, но и совершаем приятные привалы с пивом или вином. Без этого никак!</i>"
+        )
+        
+        # Отправляем финальный текст пользователю
+        await message.answer(final_message, parse_mode="HTML")
+        
+        # Отправляем финальное сообщение
+        await message.answer(
+            "💫 Отличный выбор! Надеюсь, этот день будет особенным и запомнится надолго.\n\n"
+            "Если захотите спланировать еще одно свидание, просто напишите /start"
+        )
+        
+        # Отправляем все данные админу
+        admin_text = (
+            f"📅 Новое свидание!\n\n"
+            f"От пользователя: {message.from_user.full_name} (@{message.from_user.username})\n"
+            f"<b>Дата:</b> {date_text}\n"
+            f"<b>Утро:</b> {atmo_text}{additional_atmo_text}\n"
+            f"<b>День:</b> {act_text}\n"
+            f"<b>Вечер:</b> {final_touch}{additional_final_text}\n\n"
+            f"💭 Комментарий пользователя:\n{message.text}"
+        )
+        await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
+        
+        # Сбрасываем состояние
+        await state.clear()
+        
+    except Exception as e:
+        logger.error(f"Error in process_comment: {e}")
+        await message.answer("Произошла ошибка. Пожалуйста, попробуйте еще раз.")
+        await state.clear()
 
 @router.callback_query(F.data == "custom_atmo")
 async def process_custom_atmosphere(callback: CallbackQuery, state: FSMContext):
@@ -247,62 +286,3 @@ async def process_custom_final_touch_text(message: Message, state: FSMContext):
         parse_mode="HTML"
     )
     await state.set_state(DateConstructorStates.date)
-
-@router.message(StateFilter(DateConstructorStates.date))
-async def process_date(message: Message, state: FSMContext):
-    """Обработка выбора даты"""
-    try:
-        # Получаем текущее состояние
-        data = await state.get_data()
-        atmo_text = data.get('atmosphere', '')
-        act_text = data.get('activity', '')
-        final_text = data.get('final_touch', '')
-        
-        # Форматируем дату
-        date_text = message.text.strip()
-        
-        # Формируем финальный текст
-        final_message = (
-            f"Мы просыпаемся <b>{date_text}</b> и отправляемся <b>{atmo_text}</b>.\n"
-            f"После этого нас ждет <b>{act_text}</b>.\n"
-            f"А завершим мы день <b>{final_text}</b>."
-        )
-        
-        # Отправляем финальный текст
-        await message.answer(final_message, parse_mode="HTML")
-        
-        # Переходим к этапу комментария
-        await message.answer(
-            "💭 Хочешь добавить что-то от себя? Напиши комментарий или предложение:"
-        )
-        await state.set_state(DateConstructorStates.comment)
-        
-    except Exception as e:
-        logger.error(f"Error in process_date: {e}")
-        await message.answer("Произошла ошибка при обработке даты. Пожалуйста, попробуйте еще раз.")
-        await state.clear()
-
-@router.message(StateFilter(DateConstructorStates.comment))
-async def process_comment(message: Message, state: FSMContext, bot):
-    """Обработка комментария пользователя"""
-    try:
-        # Отправляем комментарий админу
-        await bot.send_message(
-            ADMIN_ID,
-            f"💭 Комментарий от пользователя {message.from_user.full_name} (@{message.from_user.username}):\n\n{message.text}",
-            parse_mode="HTML"
-        )
-        
-        # Отправляем финальное сообщение пользователю
-        await message.answer(
-            "💫 Отличный выбор! Надеюсь, этот день будет особенным и запомнится надолго.\n\n"
-            "Если захотите спланировать еще одно свидание, просто напишите /start"
-        )
-        
-        # Сбрасываем состояние
-        await state.clear()
-        
-    except Exception as e:
-        logger.error(f"Error in process_comment: {e}")
-        await message.answer("Произошла ошибка. Пожалуйста, попробуйте еще раз.")
-        await state.clear()
