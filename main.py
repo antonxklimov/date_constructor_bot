@@ -4,9 +4,17 @@ import json
 from aiogram import Bot, Dispatcher
 from aiogram.types import Update
 from .handlers import router
+import logging
+from aiogram.storage import MemoryStorage
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Create global dispatcher instance
-dp = Dispatcher()
+bot = Bot(token=os.getenv("BOT_TOKEN"))
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
 dp.include_router(router)
 
 # Appwrite Function entry point
@@ -21,13 +29,6 @@ async def main(context):
 
         # Parse the JSON body into an aiogram Update object
         update = Update.model_validate(request_body)
-
-        # Initialize Bot for each execution (stateless)
-        bot_token = os.getenv("BOT_TOKEN")
-        if not bot_token:
-            raise ValueError("BOT_TOKEN environment variable not set")
-
-        bot = Bot(token=bot_token)
 
         # Process the update using aiogram's dispatcher
         await dp.feed_update(bot, update)
