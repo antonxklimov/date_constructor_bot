@@ -20,6 +20,7 @@ def get_final_touch_keyboard():
         [InlineKeyboardButton(text="За Крышей", callback_data="final_1")],
         [InlineKeyboardButton(text="Bruno", callback_data="final_2")],
         [InlineKeyboardButton(text="Big Wine Freaks", callback_data="final_3")],
+        [InlineKeyboardButton(text="Таби", callback_data="final_4")],
     ])
 
 def get_start_keyboard():
@@ -32,8 +33,8 @@ def get_date_keyboard():
     today = datetime.now()
     keyboard = []
     
-    # Создаем кнопки для следующих 7 дней
-    for i in range(7):
+    # Создаем кнопки для следующих 14 дней
+    for i in range(14):
         date = today + timedelta(days=i)
         date_str = date.strftime("%d.%m.%Y")
         keyboard.append([KeyboardButton(text=date_str)])

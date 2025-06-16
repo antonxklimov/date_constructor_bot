@@ -30,6 +30,7 @@ FINAL_TOUCH_TEXTS = {
     "final_1": "За Крышей",
     "final_2": "Bruno",
     "final_3": "Big Wine Freaks",
+    "final_4": "Таби",
 }
 MONTHS = {
     "01": "января", "02": "февраля", "03": "марта", "04": "апреля", "05": "мая", "06": "июня",
@@ -138,6 +139,8 @@ async def process_comment(message: Message, state: FSMContext, bot):
         additional_final_text = " Вижу, что хочется мяса."
     elif data.get('final_touch') == "final_3":
         additional_final_text = " Идем исследовать нэтти."
+    elif data.get('final_touch') == "final_4":
+        additional_final_text = " Давно не были, пора выпить саке!"
 
     text = (
         "Ура! ✨\n\n"
@@ -150,4 +153,17 @@ async def process_comment(message: Message, state: FSMContext, bot):
     
     # Отправляем красивое сообщение пользователю
     await message.answer(text, parse_mode="HTML")
+
+    # Отправляем результаты админу
+    admin_text = (
+        f"📅 Новое свидание!\n\n"
+        f"От пользователя: {message.from_user.full_name} (@{message.from_user.username})\n"
+        f"Дата: {date_text}\n"
+        f"Утро: {atmo_text}{additional_atmo_text}\n"
+        f"День: {act_text}\n"
+        f"Вечер: {final_touch}{additional_final_text}\n"
+        f"Комментарий: {message.text}"
+    )
+    await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
+    
     await state.clear()
