@@ -5,6 +5,10 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import Update
 from .handlers import router
 
+# Create global dispatcher instance
+dp = Dispatcher()
+dp.include_router(router)
+
 # Appwrite Function entry point
 async def main(context):
     try:
@@ -18,14 +22,12 @@ async def main(context):
         # Parse the JSON body into an aiogram Update object
         update = Update.model_validate(request_body)
 
-        # Initialize Bot and Dispatcher for each execution (stateless)
+        # Initialize Bot for each execution (stateless)
         bot_token = os.getenv("BOT_TOKEN")
         if not bot_token:
             raise ValueError("BOT_TOKEN environment variable not set")
 
         bot = Bot(token=bot_token)
-        dp = Dispatcher()
-        dp.include_router(router)
 
         # Process the update using aiogram's dispatcher
         await dp.feed_update(bot, update)
