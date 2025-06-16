@@ -184,11 +184,11 @@ async def process_comment(message: Message, state: FSMContext, bot):
     admin_text = (
         f"📅 Новое свидание!\n\n"
         f"От пользователя: {message.from_user.full_name} (@{message.from_user.username})\n"
-        f"Дата: {date_text}\n"
-        f"Утро: {atmo_text}{additional_atmo_text}\n"
-        f"День: {act_text}\n"
-        f"Вечер: {final_touch}{additional_final_text}\n"
-        f"Комментарий: {message.text}"
+        f"<b>Дата:</b> {date_text}\n"
+        f"<b>Утро:</b> {atmo_text}{additional_atmo_text}\n"
+        f"<b>День:</b> {act_text}\n"
+        f"<b>Вечер:</b> {final_touch}{additional_final_text}\n"
+        f"<b>Комментарий:</b> {message.text}"
     )
     await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
     
