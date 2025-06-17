@@ -89,7 +89,7 @@ async def start_steps(message: Message, state: FSMContext):
 
 @router.message(StateFilter(DateConstructorStates.atmosphere))
 async def process_atmosphere_selection(message: Message, state: FSMContext):
-    if message.text == "Свой вариант":
+    if message.text == "Свой вариант →":
         await message.answer(
             "Напиши, куда бы ты хотел(а) пойти утром:",
             reply_markup=ReplyKeyboardRemove()
@@ -108,7 +108,7 @@ async def process_atmosphere_selection(message: Message, state: FSMContext):
 
 @router.message(StateFilter(DateConstructorStates.activity))
 async def process_activity_selection(message: Message, state: FSMContext):
-    if message.text == "Свой вариант":
+    if message.text == "Свой вариант →":
         await message.answer(
             "Напиши, куда бы ты хотел(а) пойти днем:",
             reply_markup=ReplyKeyboardRemove()
@@ -127,7 +127,7 @@ async def process_activity_selection(message: Message, state: FSMContext):
 
 @router.message(StateFilter(DateConstructorStates.final_touch))
 async def process_final_touch(message: Message, state: FSMContext):
-    if message.text == "Свой вариант":
+    if message.text == "Свой вариант →":
         await message.answer(
             "Напиши, куда бы ты хотел(а) пойти вечером:",
             reply_markup=ReplyKeyboardRemove()
