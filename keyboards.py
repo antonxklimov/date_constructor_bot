@@ -4,10 +4,10 @@ from datetime import datetime, timedelta
 def get_atmosphere_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="Вейкборд на причале")],
-            [KeyboardButton(text="Водная прогулка")],
-            [KeyboardButton(text="Бассейн и загар")],
-            [KeyboardButton(text="Свой вариант")],
+            [KeyboardButton(text="Вейкборд и петнат на причале")],
+            [KeyboardButton(text="Сапы или байдарки по реке")],
+            [KeyboardButton(text="Открытый бассейн и московский загар")],
+            [KeyboardButton(text="Свой вариант →")],
         ],
         resize_keyboard=True
     )
@@ -15,10 +15,10 @@ def get_atmosphere_keyboard():
 def get_activity_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="Новый Иерусалим")],
-            [KeyboardButton(text="Три выставки")],
-            [KeyboardButton(text="Третьяковка")],
-            [KeyboardButton(text="Свой вариант")],
+            [KeyboardButton(text="Новый Иерусалим. Свет между мирами")],
+            [KeyboardButton(text="Postrigay Gallery + AZ/ART + РосИЗО")],
+            [KeyboardButton(text="Новая Третьяковка. Борис Кустодиев.")],
+            [KeyboardButton(text="Свой вариант →")],
         ],
         resize_keyboard=True
     )
@@ -29,8 +29,8 @@ def get_final_touch_keyboard():
             [KeyboardButton(text="За Крышей")],
             [KeyboardButton(text="Bruno")],
             [KeyboardButton(text="Big Wine Freaks")],
-            [KeyboardButton(text="Таби")],
-            [KeyboardButton(text="Свой вариант")],
+            [KeyboardButton(text="таби")],
+            [KeyboardButton(text="Свой вариант →")],
         ],
         resize_keyboard=True
     )
