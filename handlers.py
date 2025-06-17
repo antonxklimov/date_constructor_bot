@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.state import State, StatesGroup
@@ -28,20 +28,20 @@ ADMIN_ID = int(admin_id_str) # Конвертируем в int, так как ID
 
 # Словари соответствий для текстов кнопок
 ATMOSPHERE_TEXTS = {
-    "atmo_1": "на вейкборд с натуральным петнатом на причале",
-    "atmo_2": "на водную прогулку на сапах или байдарках",
-    "atmo_3": "в бассейн, за солнцем и новым московским загаром",
+    "Вейкборд на причале": "на вейкборд с натуральным петнатом на причале",
+    "Водная прогулка": "на водную прогулку на сапах или байдарках",
+    "Бассейн и загар": "в бассейн, за солнцем и новым московским загаром",
 }
 ACTIVITY_TEXTS = {
-    "act_1": "поездка в Новый Иерусалим на выставку «Свет между мирами»",
-    "act_2": "прогулка имени трех выставок: Postrigay Gallery + AZ/ART + РосИЗО",
-    "act_3": "центр города. Новая Третьяковка. Борис Кустодиев",
+    "Новый Иерусалим": "поездка в Новый Иерусалим на выставку «Свет между мирами»",
+    "Три выставки": "прогулка имени трех выставок: Postrigay Gallery + AZ/ART + РосИЗО",
+    "Третьяковка": "центр города. Новая Третьяковка. Борис Кустодиев",
 }
 FINAL_TOUCH_TEXTS = {
-    "final_1": "За Крышей",
-    "final_2": "Bruno",
-    "final_3": "Big Wine Freaks",
-    "final_4": "Таби",
+    "За Крышей": "За Крышей",
+    "Bruno": "Bruno",
+    "Big Wine Freaks": "Big Wine Freaks",
+    "Таби": "Таби",
 }
 MONTHS = {
     "01": "января", "02": "февраля", "03": "марта", "04": "апреля", "05": "мая", "06": "июня",
@@ -86,75 +86,81 @@ async def start_steps(message: Message, state: FSMContext):
         logger.error(f"Error in 'Ого! Давай попробуем! 👀': {e}")
         raise
 
-@router.callback_query(F.data.startswith("atmo_"))
-async def process_atmosphere_selection(callback: CallbackQuery, state: FSMContext):
-    await state.update_data(atmosphere=callback.data)
-    await callback.message.edit_text(
+@router.message(StateFilter(DateConstructorStates.atmosphere))
+async def process_atmosphere_selection(message: Message, state: FSMContext):
+    if message.text == "Свой вариант":
+        await message.answer(
+            "Напиши, куда бы ты хотел(а) пойти утром:",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        await state.set_state(DateConstructorStates.custom_atmosphere)
+        return
+
+    await state.update_data(atmosphere=message.text)
+    await message.answer(
         "<b>Шаг 2. День.</b>\n\n"
         "Нужно пропитаться искусством и периодически делать привалы на бокальчик:",
         reply_markup=get_activity_keyboard(),
         parse_mode="HTML"
     )
     await state.set_state(DateConstructorStates.activity)
-    await callback.answer()
 
-@router.callback_query(F.data.startswith("act_"))
-async def process_activity_selection(callback: CallbackQuery, state: FSMContext):
-    await state.update_data(activity=callback.data)
-    await callback.message.edit_text(
+@router.message(StateFilter(DateConstructorStates.activity))
+async def process_activity_selection(message: Message, state: FSMContext):
+    if message.text == "Свой вариант":
+        await message.answer(
+            "Напиши, куда бы ты хотел(а) пойти днем:",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        await state.set_state(DateConstructorStates.custom_activity)
+        return
+
+    await state.update_data(activity=message.text)
+    await message.answer(
         "<b>Шаг 3. Вечер.</b>\n\n"
         "Нагулялись, пора и серьезно поесть:",
         reply_markup=get_final_touch_keyboard(),
         parse_mode="HTML"
     )
     await state.set_state(DateConstructorStates.final_touch)
-    await callback.answer()
 
-@router.callback_query(F.data.startswith("final_"))
-async def process_final_touch(callback: CallbackQuery, state: FSMContext):
-    await state.update_data(final_touch=callback.data)
-    await callback.message.edit_text(
+@router.message(StateFilter(DateConstructorStates.final_touch))
+async def process_final_touch(message: Message, state: FSMContext):
+    if message.text == "Свой вариант":
+        await message.answer(
+            "Напиши, куда бы ты хотел(а) пойти вечером:",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        await state.set_state(DateConstructorStates.custom_final_touch)
+        return
+
+    await state.update_data(final_touch=message.text)
+    await message.answer(
         "<b>Шаг 4. Выбор даты.</b>\n\n"
         "📅 Выбери дату:",
         reply_markup=get_date_keyboard(),
         parse_mode="HTML"
     )
     await state.set_state(DateConstructorStates.date)
-    await callback.answer()
-
-@router.callback_query(F.data == "custom_final")
-async def process_custom_final_touch(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(
-        "Напиши, куда бы ты хотел(а) пойти вечером:"
-    )
-    await state.set_state(DateConstructorStates.custom_final_touch)
-    await callback.answer()
-
-@router.callback_query(F.data.startswith("date_"))
-async def process_date(callback: CallbackQuery, state: FSMContext, bot):
-    date = callback.data[5:]  # Убираем префикс "date_"
-    await state.update_data(date=date)
-    
-    # Переходим к этапу комментария
-    await callback.message.edit_text(
-        "💭 Хочешь добавить что-то от себя? Напиши комментарий или предложение:"
-    )
-    await state.set_state(DateConstructorStates.comment)
-    await callback.answer()
 
 @router.message(StateFilter(DateConstructorStates.date))
 async def process_date(message: Message, state: FSMContext):
-    """Обработка выбора даты"""
     try:
+        # Проверяем формат даты
+        datetime.strptime(message.text, "%d.%m.%Y")
+        
         # Сохраняем дату
-        await state.update_data(date=message.text.strip())
+        await state.update_data(date=message.text)
         
         # Переходим к этапу комментария
         await message.answer(
-            "💭 Хочешь добавить что-то? Напиши комментарий или предложение:"
+            "💭 Хочешь добавить что-то от себя? Напиши комментарий или предложение:",
+            reply_markup=ReplyKeyboardRemove()
         )
         await state.set_state(DateConstructorStates.comment)
         
+    except ValueError:
+        await message.answer("Пожалуйста, выбери дату из предложенных вариантов.")
     except Exception as e:
         logger.error(f"Error in process_date: {e}")
         await message.answer("Произошла ошибка при обработке даты. Пожалуйста, попробуйте еще раз.")
@@ -162,7 +168,6 @@ async def process_date(message: Message, state: FSMContext):
 
 @router.message(StateFilter(DateConstructorStates.comment))
 async def process_comment(message: Message, state: FSMContext, bot):
-    """Обработка комментария пользователя"""
     try:
         # Получаем все данные
         data = await state.get_data()
@@ -182,21 +187,21 @@ async def process_comment(message: Message, state: FSMContext, bot):
 
         # Добавляем дополнительные сообщения в зависимости от выбора
         additional_atmo_text = ""
-        if data.get('atmosphere') == "atmo_1":
+        if data.get('atmosphere') == "Вейкборд на причале":
             additional_atmo_text = " Натуральное игристое открывается сразу после катера."
-        elif data.get('atmosphere') == "atmo_2":
+        elif data.get('atmosphere') == "Водная прогулка":
             additional_atmo_text = " Петнат будет и здесь, но из рюкзака и прямо на воде."
-        elif data.get('atmosphere') == "atmo_3":
+        elif data.get('atmosphere') == "Бассейн и загар":
             additional_atmo_text = " Здесь игристое запрещено, поэтому оно нас ждет чуть позже."
 
         additional_final_text = ""
-        if data.get('final_touch') == "final_1":
+        if data.get('final_touch') == "За Крышей":
             additional_final_text = " Отличный выбор, современная классика и креветки с малиной."
-        elif data.get('final_touch') == "final_2":
+        elif data.get('final_touch') == "Bruno":
             additional_final_text = " Вижу, что хочется мяса."
-        elif data.get('final_touch') == "final_3":
+        elif data.get('final_touch') == "Big Wine Freaks":
             additional_final_text = " Идем исследовать нэтти."
-        elif data.get('final_touch') == "final_4":
+        elif data.get('final_touch') == "Таби":
             additional_final_text = " Давно не были, пора выпить саке!"
 
         # Формируем финальный текст
@@ -227,7 +232,8 @@ async def process_comment(message: Message, state: FSMContext, bot):
         # Отправляем финальное сообщение
         await message.answer(
             "💫 Отличный выбор! Будет классно!\n\n"
-            "Если захотите спланировать еще одно свидание, просто напишите /start"
+            "Если захотите спланировать еще одно свидание, просто напишите /start",
+            reply_markup=get_start_keyboard()
         )
         
         # Сбрасываем состояние
@@ -238,15 +244,7 @@ async def process_comment(message: Message, state: FSMContext, bot):
         await message.answer("Произошла ошибка. Пожалуйста, попробуйте еще раз.")
         await state.clear()
 
-@router.callback_query(F.data == "custom_atmo")
-async def process_custom_atmosphere(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(
-        "Напиши, куда бы ты хотела пойти утром:"
-    )
-    await state.set_state(DateConstructorStates.custom_atmosphere)
-    await callback.answer()
-
-@router.message(DateConstructorStates.custom_atmosphere)
+@router.message(StateFilter(DateConstructorStates.custom_atmosphere))
 async def process_custom_atmosphere_text(message: Message, state: FSMContext):
     await state.update_data(atmosphere=message.text)
     await message.answer(
@@ -257,15 +255,7 @@ async def process_custom_atmosphere_text(message: Message, state: FSMContext):
     )
     await state.set_state(DateConstructorStates.activity)
 
-@router.callback_query(F.data == "custom_act")
-async def process_custom_activity(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text(
-        "Напиши, куда бы ты хотела пойти днем:"
-    )
-    await state.set_state(DateConstructorStates.custom_activity)
-    await callback.answer()
-
-@router.message(DateConstructorStates.custom_activity)
+@router.message(StateFilter(DateConstructorStates.custom_activity))
 async def process_custom_activity_text(message: Message, state: FSMContext):
     await state.update_data(activity=message.text)
     await message.answer(
@@ -276,7 +266,7 @@ async def process_custom_activity_text(message: Message, state: FSMContext):
     )
     await state.set_state(DateConstructorStates.final_touch)
 
-@router.message(DateConstructorStates.custom_final_touch)
+@router.message(StateFilter(DateConstructorStates.custom_final_touch))
 async def process_custom_final_touch_text(message: Message, state: FSMContext):
     await state.update_data(final_touch=message.text)
     await message.answer(
