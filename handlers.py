@@ -16,6 +16,7 @@ from .keyboards import ( # Изменено на относительный им
     get_final_touch_keyboard,
     get_start_keyboard,
     get_date_keyboard,
+    get_final_keyboard,
 )
 
 router = Router()
@@ -229,11 +230,10 @@ async def process_comment(message: Message, state: FSMContext, bot):
         )
         await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
         
-        # Отправляем финальное сообщение
+        # Отправляем финальное сообщение с новой кнопкой
         await message.answer(
-            "💫 Отличный выбор! Будет классно!\n\n"
-            "Если захотите спланировать еще одно свидание, просто напишите /start",
-            reply_markup=get_start_keyboard()
+            "💫 Отличный выбор! Будет классно!",
+            reply_markup=get_final_keyboard()
         )
         
         # Сбрасываем состояние
@@ -276,3 +276,13 @@ async def process_custom_final_touch_text(message: Message, state: FSMContext):
         parse_mode="HTML"
     )
     await state.set_state(DateConstructorStates.date)
+
+@router.message(F.text == "Запланировать еще одно свидание?")
+async def start_new_planning(message: Message, state: FSMContext):
+    await message.answer(
+        "<b>Часть 1. Утро.</b>\n\n"
+        "Можно проснуться либо рано, либо поздно, но хочется какой-то активности (завтрак в модном месте включен):",
+        reply_markup=get_atmosphere_keyboard(),
+        parse_mode="HTML"
+    )
+    await state.set_state(DateConstructorStates.atmosphere)

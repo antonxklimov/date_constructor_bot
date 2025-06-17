@@ -41,6 +41,12 @@ def get_start_keyboard():
         resize_keyboard=True
     )
 
+def get_final_keyboard():
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Запланировать еще одно свидание?")]],
+        resize_keyboard=True
+    )
+
 def get_date_keyboard():
     today = datetime.now()
     keyboard = []
