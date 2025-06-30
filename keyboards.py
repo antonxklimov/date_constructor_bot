@@ -1,6 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from datetime import datetime, timedelta
-from texts import BUTTONS
+from texts import BUTTONS, DATE_OFFER_BUTTONS
 
 def get_atmosphere_keyboard():
     return ReplyKeyboardMarkup(
@@ -80,5 +80,11 @@ def get_date_keyboard():
     
     return ReplyKeyboardMarkup(
         keyboard=keyboard,
+        resize_keyboard=True
+    )
+
+def get_date_offer_keyboard():
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text=DATE_OFFER_BUTTONS[0])], [KeyboardButton(text=DATE_OFFER_BUTTONS[1])]],
         resize_keyboard=True
     )

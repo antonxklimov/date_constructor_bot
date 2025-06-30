@@ -17,8 +17,9 @@ from keyboards import (
     get_start_keyboard,
     get_date_keyboard,
     get_final_keyboard,
+    get_date_offer_keyboard,
 )
-from texts import ATMOSPHERE_TEXTS, ACTIVITY_TEXTS, FINAL_TOUCH_TEXTS, MONTHS, TEXTS
+from texts import ATMOSPHERE_TEXTS, ACTIVITY_TEXTS, FINAL_TOUCH_TEXTS, MONTHS, TEXTS, DATE_OFFER_TEXT, DATE_OFFER_BUTTONS, DATE_OFFER_REPLY
 
 router = Router()
 
@@ -27,11 +28,24 @@ logger = logging.getLogger(__name__)
 
 def save_user_id(user_id):
     try:
-        with open("users.txt", "a+") as f:
-            f.seek(0)
-            ids = set(line.strip() for line in f)
-            if str(user_id) not in ids:
-                f.write(f"{user_id}\n")
+        user_id = str(user_id)
+        updated = False
+        lines = []
+        try:
+            with open("users.txt", "r") as f:
+                for line in f:
+                    parts = line.strip().split(":")
+                    if parts[0] == user_id:
+                        lines.append(f"{user_id}:{parts[1] if len(parts)>1 else '0'}\n")
+                        updated = True
+                    else:
+                        lines.append(line)
+        except FileNotFoundError:
+            pass
+        if not updated:
+            lines.append(f"{user_id}:0\n")
+        with open("users.txt", "w") as f:
+            f.writelines(lines)
     except Exception as e:
         logger.error(f"Failed to save user_id: {e}")
 
@@ -274,3 +288,26 @@ async def start_new_planning(message: Message, state: FSMContext):
         parse_mode="HTML"
     )
     await state.set_state(DateConstructorStates.atmosphere)
+
+@router.message(Command("date"))
+async def cmd_date_offer(message: Message, bot):
+    if message.from_user.id != ADMIN_ID:
+        await message.answer("Нет доступа.")
+        return
+    try:
+        with open("users.txt", "r") as f:
+            user_ids = set(line.strip() for line in f if line.strip())
+        for user_id in user_ids:
+            try:
+                await bot.send_message(user_id, DATE_OFFER_TEXT, reply_markup=get_date_offer_keyboard())
+            except Exception as e:
+                logger.error(f"Не удалось отправить предложение {user_id}: {e}")
+        await message.answer("Рассылка завершена.")
+    except Exception as e:
+        await message.answer(f"Ошибка рассылки: {e}")
+
+@router.message(lambda m: m.text in DATE_OFFER_BUTTONS)
+async def process_date_offer_reply(message: Message, state: FSMContext):
+    reply = DATE_OFFER_REPLY.get(message.text)
+    if reply:
+        await message.answer(reply, reply_markup=ReplyKeyboardRemove())

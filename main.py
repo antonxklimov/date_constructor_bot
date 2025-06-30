@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from config import BOT_TOKEN
@@ -12,18 +13,31 @@ logger = logging.getLogger(__name__)
 
 async def send_reminders(bot):
     while True:
-        await asyncio.sleep(28 * 24 * 60 * 60)  # 4 недели
         try:
+            now = int(time.time())
+            updated_lines = []
             with open("users.txt", "r") as f:
-                user_ids = set(line.strip() for line in f if line.strip())
-            for user_id in user_ids:
-                try:
-                    await bot.send_message(user_id, TEXTS["reminder"])
-                    logger.info(f"Sent reminder to user {user_id}")
-                except Exception as e:
-                    logger.error(f"Failed to send reminder to {user_id}: {e}")
+                for line in f:
+                    parts = line.strip().split(":")
+                    if len(parts) == 2:
+                        user_id, last_ts = parts[0], int(parts[1])
+                    else:
+                        user_id, last_ts = parts[0], 0
+                    if now - last_ts >= 28 * 24 * 60 * 60:
+                        try:
+                            await bot.send_message(user_id, TEXTS["reminder"])
+                            logger.info(f"Sent reminder to user {user_id}")
+                            updated_lines.append(f"{user_id}:{now}\n")
+                        except Exception as e:
+                            logger.error(f"Failed to send reminder to {user_id}: {e}")
+                            updated_lines.append(line)
+                    else:
+                        updated_lines.append(line)
+            with open("users.txt", "w") as f:
+                f.writelines(updated_lines)
         except Exception as e:
-            logger.error(f"Failed to read users.txt: {e}")
+            logger.error(f"Failed to process reminders: {e}")
+        await asyncio.sleep(24 * 60 * 60)  # Проверять раз в сутки
 
 async def main():
     bot = Bot(token=BOT_TOKEN)
