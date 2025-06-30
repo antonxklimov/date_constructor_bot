@@ -6,6 +6,7 @@ __pycache__/
 .Python
 venv/
 ENV/
+users.txt
 
 # IDE
 .idea/
