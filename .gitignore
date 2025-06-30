@@ -6,6 +6,7 @@ __pycache__/
 .Python
 venv/
 ENV/
+users.txt
 
 # IDE
 .idea/
@@ -18,5 +19,3 @@ ENV/
 
 # Logs
 *.log
-
-users.txt 
