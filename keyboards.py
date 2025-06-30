@@ -1,5 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from datetime import datetime, timedelta
+from texts import BUTTONS
 
 def get_atmosphere_keyboard():
     return ReplyKeyboardMarkup(

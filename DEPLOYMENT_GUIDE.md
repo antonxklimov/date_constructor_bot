@@ -79,4 +79,99 @@ git log --oneline
 
 # Получить свежие изменения с сервера
 git pull
-``` 
+```
+
+# Гайд по деплою бота на сервер (polling + systemd)
+
+## 1. Клонирование репозитория
+
+```bash
+cd ~/bots/dateday
+git clone https://github.com/antonxklimov/date_constructor_bot.git
+cd date_constructor_bot
+```
+
+## 2. Создание и активация виртуального окружения
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+## 3. Установка зависимостей
+
+```bash
+pip install -r requirements.txt
+```
+
+## 4. Настройка конфига
+
+В файле `config.py` должны быть:
+```python
+BOT_TOKEN = "<токен_бота>"
+ADMIN_ID = <ваш_telegram_id>
+```
+
+## 5. Проверка локального запуска
+
+```bash
+python3 main.py
+```
+Бот должен отвечать на /start в Telegram.
+
+## 6. Удаление webhook (если ранее был установлен)
+
+```bash
+curl "https://api.telegram.org/bot<токен_бота>/deleteWebhook"
+```
+
+## 7. Создание systemd unit-файла
+
+```bash
+sudo nano /etc/systemd/system/date_constructor_bot.service
+```
+
+Вставить:
+```ini
+[Unit]
+Description=Date Constructor Bot
+After=network.target
+
+[Service]
+User=anton
+WorkingDirectory=/home/anton/bots/dateday/date_constructor_bot
+ExecStart=/home/anton/bots/dateday/date_constructor_bot/venv/bin/python3 main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- Проверь пути и имя пользователя!
+
+## 8. Активация и запуск сервиса
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start date_constructor_bot
+sudo systemctl enable date_constructor_bot
+```
+
+## 9. Проверка статуса и логов
+
+```bash
+sudo systemctl status date_constructor_bot
+journalctl -u date_constructor_bot -f
+```
+
+## 10. Обновление кода
+
+```bash
+cd ~/bots/dateday/date_constructor_bot
+git pull
+sudo systemctl restart date_constructor_bot
+```
+
+---
+
+**Если возникнут ошибки — смотри логи через journalctl и проверяй config.py.** 

@@ -18,35 +18,26 @@ from keyboards import (
     get_date_keyboard,
     get_final_keyboard,
 )
+from texts import ATMOSPHERE_TEXTS, ACTIVITY_TEXTS, FINAL_TOUCH_TEXTS, MONTHS, TEXTS
 
 router = Router()
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
 
-ATMOSPHERE_TEXTS = {
-    "Вейкборд и петнат на причале": "на вейкборд с натуральным петнатом на причале",
-    "Сапы или байдарки по реке": "на водную прогулку на сапах или байдарках",
-    "Открытый бассейн и московский загар": "в бассейн, за солнцем и новым московским загаром",
-}
-ACTIVITY_TEXTS = {
-    "Новый Иерусалим. Свет между мирами": "поездка в Новый Иерусалим на выставку «Свет между мирами»",
-    "Postrigay Gallery + AZ/ART + РосИЗО": "прогулка имени трех выставок: Postrigay Gallery + AZ/ART + РосИЗО",
-    "Новая Третьяковка. Борис Кустодиев.": "центр города. Новая Третьяковка. Борис Кустодиев",
-}
-FINAL_TOUCH_TEXTS = {
-    "За Крышей": "За Крышей",
-    "Bruno": "Bruno",
-    "Big Wine Freaks": "Big Wine Freaks",
-    "таби": "таби",
-}
-MONTHS = {
-    "01": "января", "02": "февраля", "03": "марта", "04": "апреля", "05": "мая", "06": "июня",
-    "07": "июля", "08": "августа", "09": "сентября", "10": "октября", "11": "ноября", "12": "декабря"
-}
+def save_user_id(user_id):
+    try:
+        with open("users.txt", "a+") as f:
+            f.seek(0)
+            ids = set(line.strip() for line in f)
+            if str(user_id) not in ids:
+                f.write(f"{user_id}\n")
+    except Exception as e:
+        logger.error(f"Failed to save user_id: {e}")
 
 @router.message(F.text == "/start")
 async def cmd_start(message: Message, state: FSMContext):
+    save_user_id(message.from_user.id)
     start_time = time.time()
     logger.info(f"Processing /start command from user {message.from_user.id}")
     try:
