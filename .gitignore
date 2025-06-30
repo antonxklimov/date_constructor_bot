@@ -17,4 +17,6 @@ ENV/
 .env
 
 # Logs
-*.log 
+*.log
+
+users.txt 
