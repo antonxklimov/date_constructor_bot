@@ -295,13 +295,27 @@ async def cmd_date_offer(message: Message, bot):
         await message.answer("Нет доступа.")
         return
     try:
+        now = int(time.time())
+        # Читаем всех пользователей
+        users = {}
         with open("users.txt", "r") as f:
-            user_ids = set(line.strip() for line in f if line.strip())
-        for user_id in user_ids:
+            for line in f:
+                parts = line.strip().split(":")
+                if len(parts) == 2:
+                    users[parts[0]] = int(parts[1])
+                elif parts[0]:
+                    users[parts[0]] = 0
+        # Рассылаем и обновляем timestamp
+        for user_id in users:
             try:
                 await bot.send_message(user_id, DATE_OFFER_TEXT, reply_markup=get_date_offer_keyboard())
+                users[user_id] = now
             except Exception as e:
                 logger.error(f"Не удалось отправить предложение {user_id}: {e}")
+        # Сохраняем обновлённые timestamps
+        with open("users.txt", "w") as f:
+            for user_id, ts in users.items():
+                f.write(f"{user_id}:{ts}\n")
         await message.answer("Рассылка завершена.")
     except Exception as e:
         await message.answer(f"Ошибка рассылки: {e}")
