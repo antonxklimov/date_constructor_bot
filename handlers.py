@@ -8,7 +8,7 @@ import os
 import logging
 import time
 
-# from config import ADMIN_ID # Удаляем импорт config
+from config import ADMIN_ID
 from states import DateConstructorStates
 from keyboards import (
     get_atmosphere_keyboard,
@@ -20,34 +20,6 @@ from keyboards import (
 )
 
 router = Router()
-
-# Получаем ADMIN_ID из переменных окружения
-admin_id_str = os.getenv("ADMIN_ID")
-if not admin_id_str:
-    raise ValueError("ADMIN_ID environment variable not set or empty")
-ADMIN_ID = int(admin_id_str) # Конвертируем в int, так как ID число
-
-# Словари соответствий для текстов кнопок
-ATMOSPHERE_TEXTS = {
-    "Вейкборд и петнат на причале": "на вейкборд с натуральным петнатом на причале",
-    "Сапы или байдарки по реке": "на водную прогулку на сапах или байдарках",
-    "Открытый бассейн и московский загар": "в бассейн, за солнцем и новым московским загаром",
-}
-ACTIVITY_TEXTS = {
-    "Новый Иерусалим. Свет между мирами": "поездка в Новый Иерусалим на выставку «Свет между мирами»",
-    "Postrigay Gallery + AZ/ART + РосИЗО": "прогулка имени трех выставок: Postrigay Gallery + AZ/ART + РосИЗО",
-    "Новая Третьяковка. Борис Кустодиев.": "центр города. Новая Третьяковка. Борис Кустодиев",
-}
-FINAL_TOUCH_TEXTS = {
-    "За Крышей": "За Крышей",
-    "Bruno": "Bruno",
-    "Big Wine Freaks": "Big Wine Freaks",
-    "таби": "таби",
-}
-MONTHS = {
-    "01": "января", "02": "февраля", "03": "марта", "04": "апреля", "05": "мая", "06": "июня",
-    "07": "июля", "08": "августа", "09": "сентября", "10": "октября", "11": "ноября", "12": "декабря"
-}
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
