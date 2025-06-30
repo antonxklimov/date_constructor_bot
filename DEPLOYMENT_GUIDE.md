@@ -76,4 +76,7 @@ git push -f origin main
 # Проверка статуса
 git status
 git log --oneline
+
+# Получить свежие изменения с сервера
+git pull
 ``` 

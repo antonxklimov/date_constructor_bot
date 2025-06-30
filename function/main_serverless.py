@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher, Router
 from aiogram.types import Update
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
-from .handlers import router
+from handlers import router
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
