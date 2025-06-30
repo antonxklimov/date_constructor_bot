@@ -24,6 +24,27 @@ router = Router()
 # Настройка логирования
 logger = logging.getLogger(__name__)
 
+ATMOSPHERE_TEXTS = {
+    "Вейкборд и петнат на причале": "на вейкборд с натуральным петнатом на причале",
+    "Сапы или байдарки по реке": "на водную прогулку на сапах или байдарках",
+    "Открытый бассейн и московский загар": "в бассейн, за солнцем и новым московским загаром",
+}
+ACTIVITY_TEXTS = {
+    "Новый Иерусалим. Свет между мирами": "поездка в Новый Иерусалим на выставку «Свет между мирами»",
+    "Postrigay Gallery + AZ/ART + РосИЗО": "прогулка имени трех выставок: Postrigay Gallery + AZ/ART + РосИЗО",
+    "Новая Третьяковка. Борис Кустодиев.": "центр города. Новая Третьяковка. Борис Кустодиев",
+}
+FINAL_TOUCH_TEXTS = {
+    "За Крышей": "За Крышей",
+    "Bruno": "Bruno",
+    "Big Wine Freaks": "Big Wine Freaks",
+    "таби": "таби",
+}
+MONTHS = {
+    "01": "января", "02": "февраля", "03": "марта", "04": "апреля", "05": "мая", "06": "июня",
+    "07": "июля", "08": "августа", "09": "сентября", "10": "октября", "11": "ноября", "12": "декабря"
+}
+
 @router.message(F.text == "/start")
 async def cmd_start(message: Message, state: FSMContext):
     start_time = time.time()
@@ -144,6 +165,10 @@ async def process_comment(message: Message, state: FSMContext, bot):
     try:
         # Получаем все данные
         data = await state.get_data()
+        comment = message.text.strip()
+        if not comment or len(comment) < 2:
+            await message.answer("Комментарий слишком короткий. Пожалуйста, напиши что-то подробнее.")
+            return
         date = data.get('date', '')
         atmo_text = ATMOSPHERE_TEXTS.get(data.get('atmosphere'), data.get('atmosphere'))
         act_text = ACTIVITY_TEXTS.get(data.get('activity'), data.get('activity'))
@@ -198,7 +223,7 @@ async def process_comment(message: Message, state: FSMContext, bot):
             f"<b>Утро:</b> {atmo_text}\n"
             f"<b>День:</b> {act_text}\n"
             f"<b>Вечер:</b> {final_touch}\n"
-            f"<b>Комментарий пользователя:</b> {message.text}"
+            f"<b>Комментарий пользователя:</b> {comment}"
         )
         await bot.send_message(ADMIN_ID, admin_text, parse_mode="HTML")
         
