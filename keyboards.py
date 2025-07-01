@@ -33,20 +33,18 @@ def get_activity_keyboard():
     )
 
 def get_final_touch_keyboard():
+    btns = BUTTONS["final_touch"]
+    keyboard = []
+    row = []
+    for btn in btns:
+        row.append(KeyboardButton(text=btn))
+        if len(row) == 2:
+            keyboard.append(row)
+            row = []
+    if row:
+        keyboard.append(row)
     return ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                KeyboardButton(text="За Крышей"),
-                KeyboardButton(text="Bruno")
-            ],
-            [
-                KeyboardButton(text="Big Wine Freaks"),
-                KeyboardButton(text="таби")
-            ],
-            [
-                KeyboardButton(text="Свой вариант →")
-            ],
-        ],
+        keyboard=keyboard,
         resize_keyboard=True
     )
 
