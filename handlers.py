@@ -310,6 +310,7 @@ async def cmd_date_offer(message: Message, bot):
             try:
                 await bot.send_message(user_id, DATE_OFFER_TEXT, reply_markup=get_date_offer_keyboard())
                 users[user_id] = now
+                logger.info(f"Manual /date: sent to {user_id}")
             except Exception as e:
                 logger.error(f"Не удалось отправить предложение {user_id}: {e}")
         # Сохраняем обновлённые timestamps
